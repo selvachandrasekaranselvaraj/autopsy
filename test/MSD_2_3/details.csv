@@ -1,0 +1,2 @@
+species_name,n_atoms_tot,n_atoms,n_frames,a,b,c,zmin,zmax,n_proc
+Li,216,36,1661,17.367,17.365,28.507,2,3,127
