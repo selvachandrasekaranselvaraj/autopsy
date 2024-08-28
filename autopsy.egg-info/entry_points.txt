@@ -1,0 +1,4 @@
+[console_scripts]
+autopsy = autopsy.cli.main:main
+plot_arrhenius = autopsy.util.plot_arrhenius:plot_arrhenius
+plot_msd = autopsy.util.plot_autopsy_msd:plot_autopsy_msd

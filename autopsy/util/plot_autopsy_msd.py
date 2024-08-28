@@ -403,7 +403,7 @@ def ionic_conductivity(temperature, volume, n_particles, slop):
     else:
         D = np.array(slop)/6  #m/s
     sigma = (n * q**2 * D) / (kB * T) #S/m
-    sigma = sigma  / 1e3  # in S/cm
+    sigma = sigma  / 1e2  # in S/cm
     return sigma #'{:.2e}'.format(sigma*100) 
 
 def plot_sigma(slopes, selected_msd_slopes, dts, betas, labels, temperatures, volumes, n_particles, output_name):  
