@@ -98,27 +98,27 @@ def n_col_row(n_atoms_type):
     elif n_atoms_type in [4, 5]:
         n_columns = 3
         n_rows = 2
-        font_size = 20
+        font_size = 22
     elif n_atoms_type in [6, 7]:
         n_columns = 4
         n_rows = 2
-        font_size = 22
+        font_size = 24
     elif n_atoms_type == 8:
         n_columns = 3
         n_rows = 3
-        font_size = 20
+        font_size = 22
     elif n_atoms_type in [9, 10, 11]:
         n_columns = 4
         n_rows = 3
-        font_size = 22
+        font_size = 24
     elif n_atoms_type == [12, 13]:
         n_columns = 3
         n_rows = 5
-        font_size = 22
+        font_size = 24
     elif n_atoms_type == [14, 15, 16]:
         n_columns = 3
         n_rows = 6
-        font_size = 24
+        font_size = 26
 
     return n_columns, n_rows, font_size
 
@@ -398,10 +398,6 @@ def plot_deepPot_accuracy():
     # Update x-axis and y-axis labels
     for n_row in range(1, n_rows + 1):
         for n_col in range(1, n_columns + 1):
-            if n_col == 1:
-                title_standoff = 12
-            else:
-                title_standoff = 2
 
             n_plot += 1
             #print(f"Subplot{n_plot} is writting for {atoms_[n_atoms_]}...")
