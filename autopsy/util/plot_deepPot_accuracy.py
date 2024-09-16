@@ -86,32 +86,41 @@ def n_col_row(n_atoms_type):
     if n_atoms_type == 1:
         n_columns = 2
         n_rows = 1
+        font_size = 18
     elif n_atoms_type == 2:
         n_columns = 3
         n_rows = 1
+        font_size = 20
     elif n_atoms_type == 3:
         n_columns = 2
         n_rows = 2
+        font_size = 18
     elif n_atoms_type in [4, 5]:
         n_columns = 3
         n_rows = 2
+        font_size = 20
     elif n_atoms_type in [6, 7]:
         n_columns = 4
         n_rows = 2
+        font_size = 22
     elif n_atoms_type == 8:
         n_columns = 3
         n_rows = 3
+        font_size = 20
     elif n_atoms_type in [9, 10, 11]:
         n_columns = 4
         n_rows = 3
+        font_size = 22
     elif n_atoms_type == [12, 13]:
         n_columns = 3
         n_rows = 5
+        font_size = 22
     elif n_atoms_type == [14, 15, 16]:
         n_columns = 3
         n_rows = 6
+        font_size = 24
 
-    return n_columns, n_rows
+    return n_columns, n_rows, font_size
 
 def plot_deepPot_accuracy():
     # Check if necessary files exist and retrieve their paths
@@ -165,7 +174,7 @@ def plot_deepPot_accuracy():
 
     # Determine the number of rows and columns for subplots
     n_atoms_type = len(atoms_)
-    n_columns, n_rows = n_col_row(n_atoms_type)
+    n_columns, n_rows, font_size = n_col_row(n_atoms_type)
 
     # Create subplots
     fig = make_subplots(rows=n_rows,
@@ -270,7 +279,7 @@ def plot_deepPot_accuracy():
     f.close()
 
     # Update layout for the plots
-    font_size = 18
+    #font_size = 18
     x_axis_details = {
         'gridcolor': 'lightgray',
         'griddash': 'dash',
