@@ -98,27 +98,27 @@ def n_col_row(n_atoms_type):
     elif n_atoms_type in [4, 5]:
         n_columns = 3
         n_rows = 2
-        font_size = 22
+        font_size = 20
     elif n_atoms_type in [6, 7]:
         n_columns = 4
         n_rows = 2
-        font_size = 24
+        font_size = 20
     elif n_atoms_type == 8:
         n_columns = 3
         n_rows = 3
-        font_size = 22
+        font_size = 20
     elif n_atoms_type in [9, 10, 11]:
         n_columns = 4
         n_rows = 3
-        font_size = 24
+        font_size = 20
     elif n_atoms_type == [12, 13]:
         n_columns = 3
         n_rows = 5
-        font_size = 24
+        font_size = 20
     elif n_atoms_type == [14, 15, 16]:
         n_columns = 3
         n_rows = 6
-        font_size = 26
+        font_size = 20
 
     return n_columns, n_rows, font_size
 
@@ -326,10 +326,10 @@ def plot_deepPot_accuracy():
         },
     }
 
-    if n_rows == 1:
-        legend_fix_y = 1
-    else:
-        legend_fix_y = (1 / n_rows) * 0.3
+    #if n_rows == 1:
+    #    legend_fix_y = 1
+    #else:
+    #   legend_fix_y = (1 / n_rows) * 0.3
 
     fig.update_layout(
         xaxis=x_axis_details,
@@ -366,7 +366,7 @@ def plot_deepPot_accuracy():
             #'x': (1 / n_columns) * (n_columns - 1) + (1 / n_columns)*0.25,
             'x': 1 - (1 / n_columns)*0.01,
             'y': (1 / n_rows)*0.01,
-            'font_size': font_size + 2,
+            'font_size': font_size + 5,
             'bgcolor':'rgba(0,0,0,0)'
         },
         plot_bgcolor='rgba(0,0,0,0)', #'white',
