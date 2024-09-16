@@ -60,6 +60,7 @@ def plot_autopsy_msd():
 
                 #plot_sigma(slopes, dts, labels, output_name)
     df_sigmas.to_csv('./msd_plots/ionic_conductivity.txt', index=False)
+    plot_autopsy_msd_species_wise()
     return
     
 
@@ -77,11 +78,11 @@ def grep_autopsy_data(folders, msd_type, specie):
     grep the data specie-wise for all foders
     '''
 
-    msds, diffusion_coeffic, times, temperatures, volumes, n_particles = [], [], [], [], [], []
+    msds, times, temperatures, volumes, n_particles = [], [], [], [], []
     labels = [] 
     for folder, label in zip(folders, folders):   
         label = label.split('/')[-1]
-        data_df = pd.read_csv(f"{folder}/msd_and_ngp.csv", delimiter=',')
+        data_df = pd.read_csv(f"{folder}/msd_and_ngp.csv", delimiter=',').iloc[20:-2500]
         details_df = pd.read_csv(f"{folder}/details.csv", delimiter=',')
 
         if specie in list(details_df['species_name']):   
@@ -100,7 +101,10 @@ def grep_autopsy_data(folders, msd_type, specie):
             a = np.array(details_df['a']).astype(float)[np.array(details_df['species_name']) == specie][0]
             b = np.array(details_df['b']).astype(float)[np.array(details_df['species_name']) == specie][0]
             c = np.array(details_df['c']).astype(float)[np.array(details_df['species_name']) == specie][0]
-            volumes.append(a*b*c)
+            zmin = np.array(details_df['zmin']).astype(float)[np.array(details_df['species_name']) == specie][0]
+            zmax = np.array(details_df['zmax']).astype(float)[np.array(details_df['species_name']) == specie][0]
+            c_ = zmax-zmin
+            volumes.append(a*b*c_)
             n_particles.append(np.array(details_df['n_atoms']).astype(int)[np.array(details_df['species_name']) == specie][0])
             try:
                 temperatures.append(np.array(details_df['temp_final']).astype(float)[np.array(details_df['species_name']) == specie][0])
@@ -130,25 +134,13 @@ def plot_msd(msds, diff_co, times, labels, output_name):
     legend_length = 0
     slopes, dts, betas, selected_msd_slopes = [], [], [], []
     for msd, d, c, label, time in zip(msds, diff_co, colors, labels, times):
-        #skip_initial_indices = int(len(msd)*0.0)
-        #skip_initial_indices = int(len(msd)*0.2)
-        #if skip_initial_indices == 0:
-        #   skip_final_indices = -1
-        #else:
-        #   skip_final_indices = -skip_initial_indices #100
-        #msd_ = np.array(msd)[skip_initial_indices:skip_final_indices] 
         window_size = int(len(msd)*0.01)
         poly_order = 1
         legend_length += len(label)
 
         # Apply Savitzky-Golay filter to smooth the noisy data
         smoothed_msd = savgol_filter(msd, window_size, poly_order)
-        #msd_fit = savgol_filter(msd_, window_size, poly_order)
-        #time_fit = np.array(time)[skip_initial_indices:skip_final_indices]
-        #p = np.polyfit(time_fit, msd_fit, poly_order)
-        #smoothed_msd = np.copy(np.polyval(p, time))
-        #smoothed_msd = msd_fit
-        #time = np.copy(time[skip_initial_indices:skip_final_indices])
+
         #################################
         #Original MSD 
         #################################
@@ -354,8 +346,8 @@ def plot_msd(msds, diff_co, times, labels, output_name):
     # Configure plot layout    
     fig.update_xaxes(title_text="Time(ns)", row=1, col=1, title_standoff=0)
     fig.update_yaxes(title_text="MSD (m<sup>2</sup>)", row=1, col=1)  # Å title_standoff=0
-    fig.update_xaxes(title_text="Time(s)", row=1, col=2, title_standoff=0) #type="log",
-    fig.update_yaxes(title_text="MSD (m<sup>2</sup>)", row=1, col=2, title_standoff=0) #title_standoff=0
+    fig.update_xaxes(title_text="log(Time) (s)", row=1, col=2, title_standoff=0) #type="log",
+    fig.update_yaxes(title_text="log(MSD) (m<sup>2</sup>)", row=1, col=2, title_standoff=0) #title_standoff=0
     fig.update_xaxes(title_text="Time(ns)", row=2, col=1, title_standoff=7)
     fig.update_yaxes(title_text="β", row=2, col=1) #range=[0, 4.5] range=[-0.9, 4.9]
     fig.update_xaxes(title_text="Time(ns)", row=2, col=2, title_standoff=7)
@@ -537,3 +529,90 @@ def plot_sigma(slopes, selected_msd_slopes, dts, betas, labels, temperatures, vo
     # Display the plot
     #print(f"{output_name} is DONE")
     return df #fig.show()
+
+
+
+def plot_autopsy_msd_species_wise():
+    # Define the folder name
+    out_folder_name = "msd_plots"
+
+    # Check if the folder exists
+    if not os.path.exists(out_folder_name):
+        # If it doesn't exist, create the folder
+        os.makedirs(out_folder_name)
+        print(f"Folder '{out_folder_name}' created.")
+
+    folders = []
+    for i in range(1, 10):
+        try:
+            folders.append(sys.argv[i])
+        except:
+            if i == 1:
+                print("No autopsy folders are available HERE!!!")
+                print("Usage: python plot_autopsy_msd.py folder1 folder2 folder3 ...")
+                exit()
+            else:
+                pass
+
+    species_ = grep_autopsy_species(folders)
+    df_sigmas = pd.DataFrame()
+
+    for folder in folders:
+        print("#############")
+        print(f"    {folder}")
+        print("#############")
+
+        for msd_type in ['self', 'distinct', 'total']:
+            msds, ds, times, labels, volumes, n_particles, temperatures = grep_autopsy_data_species_wise(folder, msd_type)
+
+            # Plot msds
+            if labels:
+                output_name = f"./{out_folder_name}/{folder}_{msd_type}"
+                slopes, dts, betas, selected_msd_slopes = plot_msd(msds, ds, times, labels, output_name)
+
+                if 'distinct' != msd_type:
+                    df_sigma = plot_sigma(slopes, selected_msd_slopes, dts, betas, labels, temperatures, volumes, n_particles, output_name)
+                    df_sigmas[f"{folder}_{msd_type}_temperature"] = df_sigma['Temperature']
+                    df_sigmas[f"{folder}_{msd_type}_sigma"] = df_sigma['sigma']
+
+    df_sigmas.to_csv('./msd_plots/ionic_conductivity_species_wise.txt', index=False)
+    return
+
+
+def grep_autopsy_data_species_wise(folder, msd_type):
+    msds, diffusion_coeffic, times, temperatures, volumes, n_particles = [], [], [], [], [], []
+    labels = []
+
+    data_df = pd.read_csv(f"{folder}/msd_and_ngp.csv", delimiter=',').iloc[20:-2500]
+    details_df = pd.read_csv(f"{folder}/details.csv", delimiter=',')
+
+    for specie in details_df['species_name']:
+        msd = (
+            data_df[f'{specie}_xyz_{msd_type}_MSD']) * 1e-20
+
+        msds.append(msd)
+        labels.append(f"{specie}")
+        time = None
+
+        try:
+            time = np.array(data_df['Time']) * 1e-12
+        except:
+            time = np.arange(0, len(msd)) * 100 * 1e-15
+        times.append(time)
+
+        a = np.array(details_df['a']).astype(float)[np.array(details_df['species_name']) == specie][0]
+        b = np.array(details_df['b']).astype(float)[np.array(details_df['species_name']) == specie][0]
+        c = np.array(details_df['c']).astype(float)[np.array(details_df['species_name']) == specie][0]
+        zmin = np.array(details_df['zmin']).astype(float)[np.array(details_df['species_name']) == specie][0]
+        zmax = np.array(details_df['zmax']).astype(float)[np.array(details_df['species_name']) == specie][0]
+        c_ = zmax - zmin
+        volumes.append(a * b * c_)
+        n_particles.append(np.array(details_df['n_atoms']).astype(int)[np.array(details_df['species_name']) == specie][0])
+
+        try:
+            temperatures.append(np.array(details_df['temp_final']).astype(float)[np.array(details_df['species_name']) == specie][0])
+        except:
+            temperatures.append(300)
+
+    ds = [None] * len(msds)
+    return msds, ds, times, labels, volumes, n_particles, temperatures
