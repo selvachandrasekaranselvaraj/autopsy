@@ -39,6 +39,7 @@ setup(
             'plot_msd=autopsy.util.plot_autopsy_msd:plot_autopsy_msd',
             'plot_arrhenius=autopsy.util.plot_arrhenius:plot_arrhenius',
             'plot_deepPot_accuracy=autopsy.util.plot_deepPot_accuracy:plot_deepPot_accuracy',
+            'plot_lammps_md=autopsy.util.plot_lammps_md:plot_lammps_md',
         ],
     },
 )
