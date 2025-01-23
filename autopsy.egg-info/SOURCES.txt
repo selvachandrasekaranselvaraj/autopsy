@@ -1,3 +1,4 @@
+LICENSE
 LICENSE.md
 README.md
 setup.py
@@ -40,8 +41,8 @@ autopsy/util/find_n_proc.py
 autopsy/util/inoic_condictivity.py
 autopsy/util/plot_arrhenius.py
 autopsy/util/plot_autopsy_msd.py
-autopsy/util/plot_autopsy_msd1.py
-autopsy/util/plot_autopsy_msd2.py
+autopsy/util/plot_deepPot_accuracy.py
+autopsy/util/plot_lammps_md.py
 autopsy/util/read_trajectory.py
 autopsy/util/select_center_atoms_indices.py
 autopsy/util/sort_atomic_indices.py

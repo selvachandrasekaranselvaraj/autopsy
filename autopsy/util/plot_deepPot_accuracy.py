@@ -208,7 +208,7 @@ def plot_deepPot_accuracy():
                         x=x_e,
                         y=y_e,
                         mode="markers",
-                        marker=dict(color=colors[0], size=7),
+                        marker=dict(color=colors[0], size=4),
                         showlegend=False,
                     ),
                     row=1,
@@ -254,7 +254,7 @@ def plot_deepPot_accuracy():
                             y=y_pred,
                             mode="markers",
                             name=legends[column_i],
-                            marker=dict(color=colors[column_i], size=5),
+                            marker=dict(color=colors[column_i], size=3),
                             showlegend=showlegend,
                         ),
                         row=n_row,
@@ -479,14 +479,14 @@ def plot_deepPot_accuracy():
     #print("Writting HTML image")
     #fig.write_html('force_accuracy.html')
     #print("Writing SVG image")
-    #fig.write_image('force_accuracy.svg',
-    #                scale=0.9,
-    #                width=width,
-    #                height=height)
+    fig.write_image('force_accuracy.svg',
+                    scale=2,
+                    width=width,
+                    height=height)
     print("Writing PNG image")
     #fig.write_image('force_accuracy.png')
     fig.write_image('force_accuracy.png',
-                    scale=0.9,
+                    scale=3,
                     width=width,
                     height=height)
 

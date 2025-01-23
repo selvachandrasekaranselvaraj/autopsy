@@ -381,7 +381,6 @@ def determine_ensemble(input_file):
         if re.search(nve_pattern, content, re.IGNORECASE):
             ensembles.append('NVE')
 
-    
     return ensembles, max(n_atoms_)
 
 # Function to read and process the LAMMPS MD data file
@@ -416,6 +415,7 @@ def read_input_file(file_path, starting_word, ending_word):
         df = pd.concat([df, df_.astype(float)])
 
     ensembles, n_atoms = determine_ensemble(file_path)
+    print(ensembles)
     df['PotEng'] /= n_atoms
     df['Press'] /= n_atoms
     df_limit = df.iloc[int(len(df) * 0.07):]
@@ -423,7 +423,7 @@ def read_input_file(file_path, starting_word, ending_word):
     #y_labels = data[0][1:len(data[0])-1]
 
     if 'NVT' in ensembles:
-        y_labels = ['Temp', 'PotEng', 'KinEng', 'Press']
+        y_labels = ['Temp', 'PotEng', 'Volume', 'Press']
     if 'NPT' in ensembles:
         y_labels = ['Temp', 'PotEng', 'Press', 'Cella', 'Cellb',  'Cellc']
     y_ranges_max = [max(np.array(df_limit[key].astype(float))) for key in y_labels]
@@ -451,7 +451,6 @@ def plot_lammps_md():
     #filenames = ['log.lammps']
     legend_grand = len(filenames) > 1 
     fig = None
-    y_ranges = []
 
     for file_n, file_ in enumerate(filenames):
         starting_word = 'Per MPI rank memory'
