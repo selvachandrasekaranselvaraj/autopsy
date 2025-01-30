@@ -37,6 +37,7 @@ autopsy/tests/test_msd.py
 autopsy/tests/test_util.py
 autopsy/util/__init__.py
 autopsy/util/calc_r.py
+autopsy/util/create_surfaces.py
 autopsy/util/find_n_proc.py
 autopsy/util/inoic_condictivity.py
 autopsy/util/plot_arrhenius.py
