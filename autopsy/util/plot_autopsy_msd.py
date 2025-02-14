@@ -389,13 +389,15 @@ def ionic_conductivity(temperature, volume, n_particles, slop):
 
     n = n_particles/(volume*1e-30) #Li/m^3
 
+
     #slop = msd/dt
     if slop is None:
         return 0.0
     else:
         D = np.array(slop)/6  #m/s
     sigma = (n * q**2 * D) / (kB * T) #S/m
-    sigma = sigma  / 1e2  # in S/cm
+    sigma = sigma  / 1e3  # in S/cm
+
     return sigma #'{:.2e}'.format(sigma*100) 
 
 def plot_sigma(slopes, selected_msd_slopes, dts, betas, labels, temperatures, volumes, n_particles, output_name):  
@@ -426,7 +428,7 @@ def plot_sigma(slopes, selected_msd_slopes, dts, betas, labels, temperatures, vo
         if sigma_total is not None:
             sigma_total = '{:.1e}'.format(sigma_total)
 
-        print(f"Calcualted sigma of {output_name} is {sigma_total}")
+        print(f"Calcualted sigma of {output_name} is {sigma_total} {label}")
 
         skip_initial = int(len(dt) * 0.001)
         skip_final = int(len(dt) * 0.001)

@@ -53,3 +53,4 @@ def structures():
             surfaces(input_file)
         else:
             print(f'File format not supported for {input_file}')
+            
