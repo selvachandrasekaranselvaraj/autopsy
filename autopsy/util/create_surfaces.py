@@ -9,7 +9,9 @@ def surfaces(filename):
     structure = Structure.from_file(filename) #* (2,2,2)
    
     # Define the Miller indices for the surfaces we want to generate
-    miller_indices = [(0,0,1), (0,1,1), (1,1,1)]
+    miller_indices = [(1, 0, 0), (0, 1, 0), (0, 0, 1), 
+                      (1, 1, 0), (1, 0, 1), (0, 1, 1), 
+                      (1, 1, 1)]
      
     # Create the "surfaces" folder if it doesn't exist
     if not os.path.exists("surfaces"):
