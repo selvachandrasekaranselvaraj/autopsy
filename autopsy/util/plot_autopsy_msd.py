@@ -31,7 +31,7 @@ def plot_autopsy_msd():
 
 
     folders = []
-    for i in range(1, 10):
+    for i in range(1, 20):
         try:
             folders.append(sys.argv[i])
         except:
@@ -121,7 +121,25 @@ def plot_msd(msds, diff_co, times, labels, output_name):
 
     # Sample colors for different datasets
     #colors = ['green', 'red', 'blue', 'orange', 'purple', 'cyan', 'magenta', 'yellow', 'black', 'brown']
-    colors =['#008000', '#FF0000', '#0000FF', '#FFA500', '#800080', '#00FFFF', '#FF00FF', '#FFFF00', '#000000', '#A52A2A']
+    #colors =['#008000', '#FF0000', '#0000FF', '#FFA500', '#800080', '#00FFFF', '#FF00FF', '#FFFF00', '#000000', '#A52A2A']
+    colors = [
+    '#008000',  # Green
+    '#FF0000',  # Red
+    '#0000FF',  # Blue
+    '#FFA500',  # Orange
+    '#800080',  # Purple
+    '#00FFFF',  # Cyan
+    '#FF00FF',  # Magenta
+    '#FFFF00',  # Yellow
+    '#000000',  # Black
+    '#A52A2A',  # Brown
+    '#808080',  # Gray
+    '#FFC0CB',  # Pink
+    '#8B0000',  # Dark Red
+    '#4682B4',  # Steel Blue
+    '#32CD32'   # Lime Green
+     ]
+
     fig = make_subplots(rows=2, 
                         cols=2, 
                         shared_xaxes=False, 
@@ -332,12 +350,6 @@ def plot_msd(msds, diff_co, times, labels, output_name):
      
         showlegend=True,
         #legend=dict(orientation='h', yref = 'paper', y = 1.1, font_size=font_size),
-        plot_bgcolor='white',  # Set the background color to white
-        paper_bgcolor='white',  # Set the paper color to white
-        height=600, 
-        width=800,
-        margin=dict(l=1),
-        font_size=font_size,
         font = dict(size = font_size, color = "black"),
         
     
@@ -412,8 +424,27 @@ def plot_sigma(slopes, selected_msd_slopes, dts, betas, labels, temperatures, vo
 
     # Sample colors for different datasets
     #colors = ['#2E7F18', '#45731E', '#675E24', '#8D472B', '#B13433', '#C82538']
-    colors =['#008000', '#FF0000', '#0000FF', '#FFA500', '#800080', '#00FFFF', '#FF00FF', '#FFFF00', '#000000', '#A52A2A']
+    #colors =['#008000', '#FF0000', '#0000FF', '#FFA500', '#800080', '#00FFFF', '#FF00FF', '#FFFF00', '#000000', '#A52A2A']
     #labels = ['298',  '318',  '338',  '358', '378']
+
+    colors = [
+    '#008000',  # Green
+    '#FF0000',  # Red
+    '#0000FF',  # Blue
+    '#FFA500',  # Orange
+    '#800080',  # Purple
+    '#00FFFF',  # Cyan
+    '#FF00FF',  # Magenta
+    '#FFFF00',  # Yellow
+    '#000000',  # Black
+    '#A52A2A',  # Brown
+    '#808080',  # Gray
+    '#FFC0CB',  # Pink
+    '#8B0000',  # Dark Red
+    '#4682B4',  # Steel Blue
+    '#32CD32'   # Lime Green
+    ]
+
     fig = make_subplots(rows=1, 
                         cols=1, 
                         shared_xaxes=False, 
@@ -545,7 +576,7 @@ def plot_autopsy_msd_species_wise():
         print(f"Folder '{out_folder_name}' created.")
 
     folders = []
-    for i in range(1, 10):
+    for i in range(1, 20):
         try:
             folders.append(sys.argv[i])
         except:
