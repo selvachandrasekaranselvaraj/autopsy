@@ -12,7 +12,7 @@ def surfaces(filename):
     miller_indices = [(1, 0, 0), (0, 1, 0), (0, 0, 1), 
                       (1, 1, 0), (1, 0, 1), (0, 1, 1), 
                       (1, 1, 1)]
-     
+    miller_indices = [(1, 0, 0), (0,1,0), (0,0,1), (2, 0, 0), (1,1,0), (2,2,0), (1,1,1), (2,2,2)]     
     # Create the "surfaces" folder if it doesn't exist
     if not os.path.exists("surfaces"):
         os.makedirs("surfaces")
@@ -25,7 +25,7 @@ def surfaces(filename):
         slab_gen = SlabGenerator(structure, 
                    miller_index = index, 
                    min_vacuum_size = 15,
-                   min_slab_size = 15,
+                   min_slab_size = 8.5,
                    #lll_reduce = True,
                    primitive = True, 
                    #reorient_lattice = True, 

@@ -9,8 +9,10 @@ def surfaces(filename):
     structure = Structure.from_file(filename) #* (2,2,2)
    
     # Define the Miller indices for the surfaces we want to generate
-    miller_indices = [(0,0,1), (0,1,1), (1,1,1)]
-     
+    miller_indices = [(1, 0, 0), (0, 1, 0), (0, 0, 1),
+                      (1, 1, 0), (1, 0, 1), (0, 1, 1),
+                      (1, 1, 1)]
+
     # Create the "surfaces" folder if it doesn't exist
     folder = "bulk_surfaces"
     if not os.path.exists(folder):
@@ -24,7 +26,7 @@ def surfaces(filename):
         slab_gen = SlabGenerator(structure, 
                    miller_index = index, 
                    min_vacuum_size = 1,
-                   min_slab_size =3,
+                   min_slab_size =1,
                    in_unit_planes = True,
                    #lll_reduce = True,
                    primitive = True, 
@@ -32,7 +34,7 @@ def surfaces(filename):
                    bulk_like = True, 
                    center_slab = False) ### If you want the slab to be center set center_slab=True
         slabs = slab_gen.get_slabs() #symmetrize=True, tol= 0.1, ftol=0.1, max_broken_bonds=0)
-        for si, slab in enumerate(slabs):
+        for si, slab in enumerate(slabs[:3]):
             outfile = f"{folder}/{base_name}_{''.join(map(str, index))}_{si+1}.vasp"
             slab = slab.get_orthogonal_c_slab().get_sorted_structure()
             Poscar(slab).write_file(outfile)
@@ -53,4 +55,3 @@ def structures():
             surfaces(input_file)
         else:
             print(f'File format not supported for {input_file}')
-            
