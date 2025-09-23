@@ -7,13 +7,14 @@ import plotly.graph_objects as go
 
 def n_col_row(n_atoms_type):
     # Map number of atom types to (columns, rows, font_size)
+    fs = 18
     layout_map = {
-        1: (2, 1, 18), 2: (3, 1, 20), 3: (2, 2, 18),
-        4: (3, 2, 20), 5: (3, 2, 20), 6: (4, 2, 20), 7: (4, 2, 20),
-        8: (3, 3, 20), 9: (4, 3, 20), 10: (4, 3, 20), 11: (4, 3, 20),
-        12: (3, 5, 20), 13: (3, 5, 20), 14: (3, 6, 20), 15: (3, 6, 20), 16: (3, 6, 20)
+        1: (2, 1, fs), 2: (2, 2, fs), 3: (2, 2, fs), 
+        4: (3, 2, fs), 5: (3, 2, fs), 6: (4, 2, fs), 7: (4, 2, fs),
+        8: (3, 3, fs), 9: (4, 3, fs), 10:(4, 3, fs), 11:(4, 3, fs), 
+        12:(3, 5, fs), 13:(3, 5, fs), 14:(3, 6, fs), 15:(3, 6, fs), 16: (3, 6, fs)
     }
-    return layout_map.get(n_atoms_type, (2, 1, 16))
+    return layout_map.get(n_atoms_type, (2, 1, fs))
 
 def check_files():
     directory_path = './'
