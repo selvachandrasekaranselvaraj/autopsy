@@ -25,8 +25,8 @@ def surfaces(filename):
     for index in miller_indices:
         slab_gen = SlabGenerator(structure, 
                    miller_index = index, 
-                   min_vacuum_size = 1,
-                   min_slab_size =1,
+                   min_vacuum_size = 1.5,
+                   min_slab_size =1.5,
                    in_unit_planes = True,
                    #lll_reduce = True,
                    primitive = True, 
