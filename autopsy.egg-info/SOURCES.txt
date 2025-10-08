@@ -41,10 +41,13 @@ autopsy/util/create_bulk_surfaces.py
 autopsy/util/create_surfaces.py
 autopsy/util/find_n_proc.py
 autopsy/util/inoic_condictivity.py
+autopsy/util/lattice_mismatch.py
 autopsy/util/plot_arrhenius.py
 autopsy/util/plot_autopsy_msd.py
 autopsy/util/plot_deepPot_accuracy.py
+autopsy/util/plot_ion_dynamics.py
 autopsy/util/plot_lammps_md.py
+autopsy/util/plot_rdf.py
 autopsy/util/read_trajectory.py
 autopsy/util/select_center_atoms_indices.py
 autopsy/util/sort_atomic_indices.py

@@ -40,7 +40,7 @@ setup(
             'plot_arrhenius=autopsy.util.plot_arrhenius:plot_arrhenius',
             'plot_deepPot_accuracy=autopsy.util.plot_deepPot_accuracy:plot_deepPot_accuracy',
             'plot_lammps_md=autopsy.util.plot_lammps_md:plot_lammps_md',
-            'plot_rdf=autopsy.util/plot_rdf:plot_rdf',
+            'plot_rdf=autopsy.util.plot_rdf:plot_rdf',
             'create_surfaces=autopsy.util.create_surfaces:structures',
             'create_bulk_like_surfaces=autopsy.util.create_bulk_surfaces:structures',
         ],
