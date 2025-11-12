@@ -30,10 +30,11 @@ def n_col_row(n_atoms_type):
     # Map number of atom types to (columns, rows, font_size)
     fs = 16
     layout_map = {
-        1: (2, 1, fs), 2: (2, 2, fs), 3: (2, 2, fs),
-        4: (3, 2, fs), 5: (3, 2, fs), 6: (4, 2, fs), 7: (4, 2, fs),
-        8: (3, 3, fs), 9: (4, 3, fs), 10:(4, 3, fs), 11:(4, 3, fs),
-        12:(3, 5, fs), 13:(3, 5, fs), 14:(3, 6, fs), 15:(3, 6, fs), 16: (3, 6, fs)
+        1: (2, 1, fs), 2: (2, 2, fs), 3: (3, 1, fs),
+        4: (3, 2, fs), 5: (3, 2, fs), 6: (3, 2, fs), 7: (4, 2, fs),
+        8: (4, 2, fs), 9: (3, 3, fs), 10:(4, 3, fs), 11:(4, 3, fs),
+       12: (4, 3, fs),13: (4, 4, fs), 14:(4, 4, fs), 15:(4, 4, fs), 16: (4, 4, fs),
+       17: (4, 5, fs),18: (4, 5, fs), 19:(4, 5, fs), 20:(4, 5, fs), 21: (4, 6, fs) 
     }
     return layout_map.get(n_atoms_type, (2, 1, fs))
 
@@ -113,7 +114,7 @@ def update_figure_legends(fig, n_columns, n_rows, font_size):
             yanchor='bottom',
             x=legend_x,
             y=legend_y,
-            font=dict(size=font_size + 3, color='black', family="Times New Roman, serif"),
+            font=dict(size=font_size + 5, color='black', family="Times New Roman, serif"),
             bgcolor='rgba(0,0,0,0)',
             itemsizing='constant',
             itemwidth=30,
@@ -141,13 +142,19 @@ def add_subplot_annotation(fig, n_row, n_col, sub_label, plot_range, font_size):
         col=n_col
     )
 
-def convert_to_subscript(formula):
+def convert_to_subscript(formula, response):
     """Convert chemical formula with numbers to subscript format"""
     import re
     
-    # Use regex to find numbers and replace them with subscript
-    subscript_formula = re.sub(r'(\d+)', r'<sub>\1</sub>', formula)
-    return subscript_formula
+    if response in ['y', 'yes']:
+        # Use regex to find numbers and replace them with subscript
+        subscript_formula = re.sub(r'(\d+)', r'<sub>\1</sub>', formula)
+        #print(f"Original formula: {formula}")
+        #print(f"Subscript formula: {subscript_formula}")
+        return subscript_formula
+    else:
+        #print(f"Keeping original format: {formula}")
+        return formula
 
 def check_files():
     """Check for structure files in current directory"""
@@ -209,7 +216,7 @@ def supercell(data, rMax):
     repetitions = np.ceil(rMax_needed / lengths).astype(int)
     
     # Ensure at least 2x2x2 for meaningful RDF
-    repetitions = np.maximum(repetitions, [2, 2, 2])
+    repetitions = np.maximum(repetitions, [1, 1, 1])
     
     print(f"Creating {repetitions[0]}x{repetitions[1]}x{repetitions[2]} supercell")
     
@@ -222,7 +229,7 @@ def count_name(name_list, target_name):
     """Return the count of target_name in the list"""
     return name_list.count(target_name)
 
-def calculate_rdf_data(traj_data, rMax=10, nBins=100):
+def calculate_rdf_data(traj_data, rMax=6, nBins=100):
     """Calculate RDF data for all element pairs"""
     all_rdf_data = []
     
@@ -241,8 +248,8 @@ def calculate_rdf_data(traj_data, rMax=10, nBins=100):
         symbols = []
         for tra in traj:
             symbols.extend(list(tra.symbols))
-        symbols = list(set(symbols))
-        
+        symbols = tuple(sorted(list(set(symbols))))
+
         # Calculate RDF for all element pairs
         rdf_pairs = []
         for e_i, element1 in enumerate(symbols):
@@ -275,7 +282,7 @@ def calculate_rdf_data(traj_data, rMax=10, nBins=100):
 def plot_rdf():
     # Check for structure files
     filenames = []
-    for i in range(1, 5):
+    for i in range(1, 10):
         try:
             filenames.append(sys.argv[i])
         except:
@@ -289,6 +296,10 @@ def plot_rdf():
     
     if not filenames:
         filenames = check_files()
+
+    # Ask user if they want to convert to subscript
+    response = input(f"Do you want to convert numbers in legends to subscript format? (y/n): ").strip().lower()
+    
     
     # Read structure files
     traj_data, symbols, legends = read_structure_files(filenames)
@@ -299,19 +310,23 @@ def plot_rdf():
     
     # Calculate RDF data
     all_rdf_data = calculate_rdf_data(traj_data)
-    
-    # Get all unique element pairs across all datasets
+
+    # Get all unique element pairs across all datasets (order-independent)
     all_element_pairs = set()
     for dataset in all_rdf_data:
         for pair in dataset['rdf_pairs']:
-            all_element_pairs.add((pair['element1'], pair['element2']))
-    
+            # Create sorted tuple to make pairs order-independent
+            element1, element2 = pair['element1'], pair['element2']
+            sorted_pair = tuple(sorted([element1, element2]))
+            all_element_pairs.add(sorted_pair)
+
     all_element_pairs = sorted(list(all_element_pairs))
     no_of_subplots = len(all_element_pairs)
-    
+
     print("No. of subplots: ", no_of_subplots)
     print("RDF pairs:", all_element_pairs)
 
+    
     # Get layout configuration
     n_columns, n_rows, font_size = n_col_row(no_of_subplots)
     
@@ -320,11 +335,12 @@ def plot_rdf():
         rows=n_rows, 
         cols=n_columns,
         shared_xaxes=False,
+        shared_yaxes=False,
         vertical_spacing=0.35 / n_rows,
         horizontal_spacing=0.35 / n_columns
     )
     # Subplot labels
-    sub_labels = ['', '(a)', '(b)', '(c)', '(d)', '(e)', '(f)', '(g)', '(h)', '(i)', '(j)', '(k)', '(l)', '(m)', '(n)']
+    sub_labels = ['', '(a)', '(b)', '(c)', '(d)', '(e)', '(f)', '(g)', '(h)', '(i)', '(j)', '(k)', '(l)', '(m)', '(n)', '(o)', '(p)', '(q)', '(r)', '(s)', '(t)', '(u)', '(v)']
     
     # Colors for different datasets
     colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
@@ -354,7 +370,7 @@ def plot_rdf():
                         legend_name = legends[dataset_idx] if dataset_idx < len(legends) else f"Dataset_{dataset_idx+1}"
                         
                         # Convert to subscript format
-                        formatted_legend = convert_to_subscript(legend_name)
+                        formatted_legend = convert_to_subscript(legend_name, response)
  
                         # Show legend only for the first occurrence of each dataset
                         showlegend = legend_name not in shown_legends
@@ -374,10 +390,17 @@ def plot_rdf():
                             row=row, col=col
                         )         
                 # Set axis ranges and labels
-                xaxis_range = [0.9, 7.2]  # RDF typically from 1Å to 10Å
+                xaxis_range = [0.0, 6.2]  # RDF typically from 1Å to 10Å
                 y_max = max([max(pair['y']) for dataset in all_rdf_data 
                            for pair in dataset['rdf_pairs'] 
                            if pair['element1'] == element1 and pair['element2'] == element2], default=3)
+
+                # More memory efficient
+                #y_max = max((max(pair['y']) for dataset in all_rdf_data 
+                #           for pair in dataset['rdf_pairs']), default=3)
+                if y_max < 1.1:
+                    y_max = 1.1
+
                 yaxis_range = [0, y_max * 1.1]
                 sub_annotate_range = [xaxis_range[0]*1.5, yaxis_range[1]]
                 
