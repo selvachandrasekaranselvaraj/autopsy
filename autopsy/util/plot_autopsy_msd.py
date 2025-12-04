@@ -17,7 +17,8 @@ import numpy as np
 import pandas as pd
 import re, os, sys
 
-
+import plotly.io as pio
+pio.get_chrome()
     
 def plot_autopsy_msd():
     # Define the folder name
@@ -287,7 +288,7 @@ def plot_msd(msds, diff_co, times, labels, output_name):
             linecolor='black',  # Set the border line color
             linewidth = 2,
             mirror = True,
-            titlefont=dict(size = font_size+2, color = "black"),
+            tickfont=dict(size = font_size+2, color = "black"),
             ticks="inside",
             tickwidth=2,
             ticklen=10,
@@ -304,7 +305,7 @@ def plot_msd(msds, diff_co, times, labels, output_name):
             linecolor='black',  # Set the border line color
             linewidth = 2,
             #title='VF Energy (eV)',
-            titlefont=dict(size = font_size+2, color = "black"),
+            tickfont=dict(size = font_size+2, color = "black"),
             mirror = True,
             ticks="inside",
             tickwidth=2,
@@ -325,7 +326,7 @@ def plot_msd(msds, diff_co, times, labels, output_name):
             linecolor='black',  # Set the border line color
             linewidth = 2,
             #title='VF Energy (eV)',
-            titlefont=dict(size = font_size+2, color = "black"),
+            tickfont=dict(size = font_size+2, color = "black"),
             mirror = True,
             ticks="inside",
             tickwidth=2,
@@ -386,7 +387,7 @@ def plot_msd(msds, diff_co, times, labels, output_name):
     
 
     # Save the plot to an HTML file
-    fig.write_html(f"{output_name}_msd.html")
+    #fig.write_html(f"{output_name}_msd.html")
     fig.write_image(f"{output_name}_msd.png")
 
     # Display the plot
@@ -490,7 +491,7 @@ def plot_sigma(slopes, selected_msd_slopes, dts, betas, labels, temperatures, vo
             linecolor='black',  # Set the border line color
             linewidth = 2,
             mirror = True,
-            titlefont=dict(size = font_size+2, color = "black"),
+            tickfont=dict(size = font_size+2, color = "black"),
             ticks="inside",
             tickwidth=2,
             ticklen=10,
@@ -508,7 +509,7 @@ def plot_sigma(slopes, selected_msd_slopes, dts, betas, labels, temperatures, vo
             linecolor='black',  # Set the border line color
             linewidth = 2,
             #title='VF Energy (eV)',
-            titlefont=dict(size = font_size+2, color = "black"),
+            tickfont=dict(size = font_size+2, color = "black"),
             mirror = True,
             ticks="inside",
             tickwidth=2,

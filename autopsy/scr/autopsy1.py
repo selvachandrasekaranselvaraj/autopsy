@@ -84,42 +84,11 @@ class PropertyCalculator:
         self.zmin = zmin
         self.zmax = zmax
         self.out_dir = out_dir
-        
-        # NEW: Position cache initialization
-        self._positions_cache = {}
-        self._all_positions = None
 
         # Create the directory if it doesn't exist
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
 
-    def _extract_all_positions(self):
-        """
-        Extract all positions ONCE and cache them by atom type.
-        This eliminates the 15+ second gap between operations.
-        """
-        print("🔄 Pre-extracting atomic positions (this saves time later)...")
-        
-        n_atoms_total = len(self.symbols)
-        
-        # Extract ALL positions at once
-        self._all_positions = np.zeros((self.n_frames, n_atoms_total, 3), 
-                                      dtype=np.float32)
-        
-        # Extract positions with progress indication
-        for i in range(self.n_frames):
-            self._all_positions[i] = self.data[i].positions.astype(np.float32)
-            if i % 100 == 0 or i == self.n_frames - 1:
-                print(f"  Extracted {i+1}/{self.n_frames} frames", end='\r')
-        
-        print(f"  Extracted {self.n_frames}/{self.n_frames} frames")
-        
-        # Cache positions for each atom type
-        for atom in self.atoms_list:
-            atom_indices = np.where(self.symbols == atom)[0]
-            self._positions_cache[atom] = self._all_positions[:, atom_indices, :]
-        
-        print(f"✅ Positions cached for {len(self.atoms_list)} atom types")
 
     def calculate_ionic_movements(self, positions, cell, atom):
         '''
@@ -242,26 +211,28 @@ class PropertyCalculator:
         '''
         Method to perform calculations for various properties.
         '''
-        # EXTRACT ALL POSITIONS ONCE (eliminates the 15+ second gap)
-        self._extract_all_positions()
-        
-        pos_ = np.array([self._all_positions[0], self._all_positions[-1]])
+        pos_ = np.array([self.data[0].positions, self.data[-1].positions])
         indices = sort_atomic_indices(pos_, self.cell, self.zmin, self.zmax)
-        atoms_list_ = self.symbols[indices]
+        atoms_list_ = np.array(list(self.data[0].symbols))[indices]
         self.symbols = np.array(list(self.data[0].symbols))
+
+        #self.atoms_list = np.sort(list(set(atoms_list_)))
+
+        #for atom in ['Li']: #self.atoms_list:
 
         # Create a list to store data for each atom
         data_list = []
         for atom in self.atoms_list:
 
-            # GET POSITIONS FROM CACHE (FAST - no repeated extraction!)
-            positions = self._positions_cache[atom]
+            n_atoms = np.sum(self.symbols == atom)
+            positions = np.empty((self.n_frames, n_atoms, 3))
+            for i in range(0, len(self.data)):
+                positions[i] = self.data[i].positions[np.where(
+                    np.array(list(self.data[i].symbols)) == atom)[0]]
+        
             
-            # Sort indices for this specific atom type
-            pos_atom = np.array([positions[0], positions[-1]])
-            indices = sort_atomic_indices(pos_atom, self.cell, self.zmin, self.zmax)
+            indices = sort_atomic_indices(positions, self.cell, self.zmin, self.zmax)
 
-            # Calculate properties using cached positions
             self.calculate_ionic_movements(positions, self.cell, atom)
             self.calculate_msd(positions, indices, atom)
             #self.calculate_vhf(positions, indices, atom)
@@ -276,7 +247,7 @@ class PropertyCalculator:
                 zmax_ = self.zmax
             atom_data = {
                 'species_name': atom,
-                'n_atoms_tot': positions.shape[1],
+                'n_atoms_tot': n_atoms,
                 'n_atoms': len(indices),
                 'n_frames': self.n_frames,
                 'a': round(self.cell[0], 3),  # Assuming self.cell is a list of a, b, c
