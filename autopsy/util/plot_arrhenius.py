@@ -49,12 +49,12 @@ def arrhenius_plot(temperatures_2d, ionic_condu_2d, labels):
     font_size = 18
     x_axis_details = dict(
         showline=True, linecolor='black', linewidth=2, mirror=True,
-        titlefont=dict(size=font_size + 2, color="black"), ticks="inside",
+        tickfont=dict(size=font_size + 2, color="black"), ticks="inside",
         tickwidth=2, ticklen=10, minor=dict(ticks="inside", ticklen=5, tickwidth=1, tickcolor="black", showgrid=True),
     )
     y_axis_details = dict(
         showline=True, linecolor='black', linewidth=2, mirror=True,
-        titlefont=dict(size=font_size + 2, color="black"), ticks="inside",
+        tickfont=dict(size=font_size + 2, color="black"), ticks="inside",
         tickwidth=2, ticklen=10, minor=dict(ticks="inside", ticklen=5, tickwidth=1, tickcolor="black", showgrid=False),
     )
     fig.update_layout(
