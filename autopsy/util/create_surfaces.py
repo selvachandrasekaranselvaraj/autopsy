@@ -9,10 +9,7 @@ def surfaces(filename):
     structure = Structure.from_file(filename) #* (2,2,2)
    
     # Define the Miller indices for the surfaces we want to generate
-    miller_indices = [(1, 0, 0), (0, 1, 0), (0, 0, 1), 
-                      (1, 1, 0), (1, 0, 1), (0, 1, 1), 
-                      (1, 1, 1)]
-    miller_indices = [(1, 0, 0), (0,1,0), (0,0,1), (2, 0, 0), (1,1,0), (2,2,0), (1,1,1), (2,2,2)]     
+    miller_indices = [(1, 0, 0), (0,1,0), (0,0,1), (1,1,0), (1,1,1)]     
     # Create the "surfaces" folder if it doesn't exist
     if not os.path.exists("surfaces"):
         os.makedirs("surfaces")
@@ -23,20 +20,20 @@ def surfaces(filename):
     # Generate and save surfaces
     for index in miller_indices:
         slab_gen = SlabGenerator(structure, 
-                   miller_index = index, 
-                   min_vacuum_size = 15,
-                   min_slab_size = 8.5,
-                   #lll_reduce = True,
-                   primitive = True, 
-                   #reorient_lattice = True, 
-                   center_slab = True) ### If you want the slab to be center set center_slab=True
-        slabs = slab_gen.get_slabs() #symmetrize=True, tol= 0.1, ftol=0.1, max_broken_bonds=0)
+                                 miller_index=index, 
+                                 in_unit_planes=False,
+                                 min_vacuum_size=20,
+                                 min_slab_size=10,
+                                 lll_reduce=True,
+                                 primitive=False, 
+                                 reorient_lattice=True,
+                                 center_slab=True)   # <-- corrected: center_slab inside the call
+        slabs = slab_gen.get_slabs() # you can add symmetrize=True etc. if needed
         for si, slab in enumerate(slabs):
             outfile = f"surfaces/{base_name}_{''.join(map(str, index))}_{si+1}.vasp"
             slab = slab.get_orthogonal_c_slab().get_sorted_structure()
             Poscar(slab).write_file(outfile)
             
-    
     print(f"Surface structures for {filename} have been generated and saved in the 'surfaces' folder.")
 
 def structures():
@@ -53,4 +50,5 @@ def structures():
         else:
             print(f'File format not supported for {input_file}')
 
-
+if __name__ == "__main__":
+    structures()

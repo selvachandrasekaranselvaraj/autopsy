@@ -31,10 +31,10 @@ def n_col_row(n_atoms_type):
     fs = 16
     layout_map = {
         1: (2, 1, fs), 2: (2, 2, fs), 3: (3, 1, fs),
-        4: (3, 2, fs), 5: (3, 2, fs), 6: (3, 2, fs), 7: (4, 2, fs),
-        8: (4, 2, fs), 9: (3, 3, fs), 10:(4, 3, fs), 11:(4, 3, fs),
-       12: (4, 3, fs),13: (4, 4, fs), 14:(4, 4, fs), 15:(4, 4, fs), 16: (4, 4, fs),
-       17: (4, 5, fs),18: (4, 5, fs), 19:(4, 5, fs), 20:(4, 5, fs), 21: (4, 6, fs) 
+        4: (3, 2, fs), 5: (3, 2, fs), 6: (3, 2, fs), 7: (3, 3, fs),
+        8: (3, 3, fs), 9: (3, 3, fs), 10:(3, 4, fs), 11:(3, 4, fs),
+       12: (3, 4, fs),13: (3, 5, fs), 14:(3, 5, fs), 15:(3, 5, fs), 16: (3, 6, fs),
+       17: (3, 6, fs),18: (3, 6, fs), 19:(3, 7, fs), 20:(3, 7, fs), 21: (3, 7, fs) 
     }
     return layout_map.get(n_atoms_type, (2, 1, fs))
 
@@ -85,7 +85,7 @@ def axis_details(axis_range, axis_label, font_size, standoff):
         tickwidth=2,
         ticklen=10,
         tickcolor='black',
-        tickfont=dict(size=font_size + 2, color='black', family="Times New Roman, serif"),
+        tickfont=dict(size=font_size + 4, color='black', family="Times New Roman, serif"),
         gridcolor='lightgray',
         griddash='dash',
         tickmode='array',
@@ -105,6 +105,7 @@ def axis_details(axis_range, axis_label, font_size, standoff):
 def update_figure_legends(fig, n_columns, n_rows, font_size):
     legend_x = 0.1 #1 - (1 / n_columns) * 0.01
     legend_y = 1.00 #(1 / n_rows) * 0.01
+
     fig.update_layout(
         legend=dict(
             orientation='h',
@@ -114,7 +115,7 @@ def update_figure_legends(fig, n_columns, n_rows, font_size):
             yanchor='bottom',
             x=legend_x,
             y=legend_y,
-            font=dict(size=font_size + 5, color='black', family="Times New Roman, serif"),
+            font=dict(size=font_size + 9, color='black', family="Times New Roman, serif"),
             bgcolor='rgba(0,0,0,0)',
             itemsizing='constant',
             itemwidth=30,
@@ -122,9 +123,10 @@ def update_figure_legends(fig, n_columns, n_rows, font_size):
         ),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        margin=dict(l=10, r=10, b=10, t=10),
-        font=dict(size=font_size + 2, color='black', family="Times New Roman, serif"),
-        height=250 * n_rows, width=250 * n_columns,
+        margin={'l': 0.5, 'r': 0.9, 'b': 0.5, 't': 0.9},
+        font_size=font_size + 5,
+        font_color='black',
+        font_family='Times New Roman, serif',
     )
 
 def add_subplot_annotation(fig, n_row, n_col, sub_label, plot_range, font_size):
@@ -352,6 +354,10 @@ def plot_rdf():
     subplot_i = 1
     for row in range(1, n_rows + 1):
         for col in range(1, n_columns + 1):
+            if col == 1:
+                standoff = 7
+            else:
+                standoff = 1
             if subplot_i <= no_of_subplots:
                 element1, element2 = all_element_pairs[subplot_i - 1]
                 xaxis_key = f'xaxis{subplot_i}' if subplot_i > 1 else 'xaxis'
@@ -420,7 +426,7 @@ def plot_rdf():
                         yaxis_range,
                         f"RDF", # ({element1}-{element2})",
                         font_size,
-                        1
+                        standoff
                     )
                 })
                 
@@ -437,9 +443,8 @@ def plot_rdf():
 
     # Update figure layout and legends
     update_figure_legends(fig, n_columns, n_rows, font_size)
-    
     # Save the figure
-    fig.write_image('rdf.png', scale=3)
+    fig.write_image('rdf.png', scale=3, height=250*n_rows, width=250*n_columns)
     fig.write_html('rdf.html')
     print("RDF plot saved as 'rdf.png' and 'rdf.html'")
     
