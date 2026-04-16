@@ -58,6 +58,22 @@ def n_col_row(n_plots):
 
     return n_rows, n_columns
 
+def plot_size(n_rows, n_columns):
+    if n_columns == 3:
+        width = 500 * n_columns
+        height = 120 * n_rows
+        font_size = font_size + 2
+    elif n_columns == 2:
+        width = 600 * n_columns
+        height = 175 * n_rows
+    elif n_columns == 4:
+        width = 600 * n_columns
+        height = 300 * n_rows
+    else:
+        width = 600 * n_columns
+        height = 200
+    return height, width
+
 # Function to decorate plot borders and layout
 def decorate_borders(fig, 
                      font_size, 
@@ -84,16 +100,6 @@ def decorate_borders(fig,
     Returns:
         fig (go.Figure): The updated plotly figure object.
     """
-    if n_columns == 3:
-        width = 500 * n_columns
-        height = 120 * n_rows
-        font_size = font_size + 2
-    elif n_columns == 2:
-        width = 600 * n_columns
-        height = 175 * n_rows
-    else:
-        width = 600 * n_columns
-        height = 200
 
     # Define axis details
     x_axis_details = {
@@ -170,7 +176,8 @@ def decorate_borders(fig,
         for n_col in range(1, n_columns + 1):
             if i_plot >= len(modified_y_labels):
                 break
-            fig.update_yaxes(title_text=modified_y_labels[i_plot], title_standoff=10, row=n_row, col=n_col)
+            fig.update_yaxes(title_text=modified_y_labels[i_plot], title_standoff=12, row=n_row, col=n_col)
+            #fig.update_yaxes(title_text=modified_y_labels[i_plot], title_standoff=15, tickformat=".3f", row=n_row, col=n_col)
             if n_row == n_rows:
                 fig.update_xaxes(title_text=f"Time ({time_unit})", title_standoff=10, row=n_row, col=n_col)
             i_plot += 1
@@ -196,8 +203,8 @@ def decorate_borders(fig,
         font_size=font_size,
         font_color='black',
         font_family='Courier',
-        height=height,
-        width=width
+        #height=height,
+        #width=width
     )
 
     # Add figure labels if required
@@ -226,43 +233,24 @@ def decorate_borders(fig,
     return fig
 
 # Function to plot data using Plotly
-def plotly_plot(n_files, 
-                df, 
-                y_labels, 
-                fig, 
-                file_n, 
-                file_name, 
-                y_ranges_max,
-                y_ranges_min,
-                legend_grand):
+def plotly_plot(n_files, df, y_labels, fig, file_n, file_name, y_ranges_max, y_ranges_min, legend_grand):
     """
     Creates a plotly figure with subplots based on the data provided.
-
-    Args:
-        n_files (int): Total number of files.
-        df (pd.DataFrame): Dataframe with the data.
-        y_labels (list): List of y-axis labels.
-        fig (go.Figure): Plotly figure object.
-        file_n (int): Current file index.
-        file_name (str): Name of the current file.
-        font_size (int): Font size for labels and legends.
-        y_ranges (list): Y-axis range values.
-
-    Returns:
-        fig (go.Figure): The updated plotly figure object.
     """
     show_flabels = (n_files == file_n + 1)
     n_rows, n_columns = n_col_row(len(y_labels))
+    
     if n_columns >= 3:
         font_size = 20
-        horizontal_spacing = 0.10
+        horizontal_spacing = 0.15
         vertical_spacing = 0.06
     else:
         font_size = 21
-        horizontal_spacing = 0.15
+        horizontal_spacing = 0.13
         vertical_spacing = 0.04
     
-    if file_n == 0:
+    # ALWAYS create figure if None, or only on first file
+    if file_n == 0 or fig is None:
         fig = make_subplots(
             rows=n_rows,
             cols=n_columns,
@@ -270,22 +258,22 @@ def plotly_plot(n_files,
             vertical_spacing=vertical_spacing,
             horizontal_spacing=horizontal_spacing
         )
-
+    
     colors = ['green', 'red', 'blue', 'orange', 'purple', 'cyan', 'magenta', 'yellow', 'black', 'brown']
-
+    
+    # Time axis setup
     try:
         x = np.array(df['Time']).astype(float) * 1e-12 / 1e-9  # time in ns
     except KeyError:
-        #x = np.array(df['Step']).astype(float) * 1e-15 / 1e-9  # time in ns
         x = np.arange(1, len(df['Step'])) * 1e-15 / 1e-9  # time in ns
-
+    
     if max(x) < 0.1:
         time_unit = 'ps'
         x = x * 1e3
     else:
         time_unit = 'ns'
-
-    # Number of elements to select
+    
+    # Downsample for performance
     n_time = 10000
     if len(x) > n_time:
         interval = len(x) // n_time
@@ -293,7 +281,8 @@ def plotly_plot(n_files,
     else:
         interval = 1
         x = x[::interval]
-
+    
+    # Add traces to subplots
     i_plot = 0
     skip_initial = 0
     for n_row in range(1, n_rows + 1):
@@ -301,36 +290,33 @@ def plotly_plot(n_files,
             if i_plot >= len(y_labels):
                 break
             y_label = y_labels[i_plot]
-            y = np.array(df[y_label].astype(float))[::interval] 
-            if i_plot == 0 and legend_grand:
-                showlegend = True
-            else:
-                showlegend = False
+            y = np.array(df[y_label].astype(float))[::interval]
+            
+            showlegend = (i_plot == 0 and legend_grand)
+            
             fig.add_trace(
                 go.Scatter(
                     x=x[skip_initial:],
-                    #y=np.floor(y[skip_initial:]).astype(float),
                     y=np.array(y[skip_initial:]).astype(float),
                     name=file_name[:-4],
                     line=dict(color=colors[file_n]),
                     showlegend=showlegend,
+                    hovertemplate='%{y:.2f}<extra></extra>',
                 ),
                 row=n_row,
                 col=n_col
             )
             i_plot += 1
-
-    fig = decorate_borders(fig, 
-                           font_size, 
-                           n_rows, 
-                           n_columns, 
-                           y_ranges_max,
-                           y_ranges_min, 
-                           y_labels, 
-                           show_flabels, 
-                           time_unit)
+    
+    # Decorate and finalize
+    fig = decorate_borders(fig, font_size, n_rows, n_columns, 
+                          y_ranges_max, y_ranges_min, y_labels, 
+                          show_flabels, time_unit)
+    
     print(f"{file_name}...")
-    return fig
+
+
+    return fig 
 
 # Function to find lines containing a specific word in a file
 def find_word_in_file(file_path, word_to_find):
@@ -381,6 +367,7 @@ def determine_ensemble(input_file):
         if re.search(nve_pattern, content, re.IGNORECASE):
             ensembles.append('NVE')
 
+    
     return ensembles, max(n_atoms_)
 
 # Function to read and process the LAMMPS MD data file
@@ -415,17 +402,25 @@ def read_input_file(file_path, starting_word, ending_word):
         df = pd.concat([df, df_.astype(float)])
 
     ensembles, n_atoms = determine_ensemble(file_path)
-    print(ensembles)
-    df['PotEng'] /= n_atoms
-    df['Press'] /= n_atoms
-    df_limit = df.iloc[int(len(df) * 0.07):]
+    df['PotEng'] = (df['PotEng'] / n_atoms).round(3)
+    df['Press'] = (df['Press'] / n_atoms).round(3)
+    #df['Temp'] = df['Temp'] + 10
+    #df['PotEng'] /= n_atoms
+    #df['Press'] /= n_atoms
+    df_limit = df.iloc[int(len(df) * 0.01):]
+
+    if 'Cella' in df.keys():
+        df_limit = df_limit.copy()
+        df_limit.loc[:, 'Volume'] = ( df_limit['Cella'].astype(float) * df_limit['Cellb'].astype(float) * df_limit['Cellc'].astype(float))
 
     #y_labels = data[0][1:len(data[0])-1]
 
     if 'NVT' in ensembles:
-        y_labels = ['Temp', 'PotEng', 'Volume', 'Press']
+        #y_labels = ['Temp', 'PotEng', 'Press', 'Volume']
+        y_labels = ['Temp', 'PotEng', 'KinEng', 'Press']
     if 'NPT' in ensembles:
-        y_labels = ['Temp', 'PotEng', 'Press', 'Cella', 'Cellb',  'Cellc']
+        y_labels = ['Temp', 'PotEng', 'Press', 'Volume']
+        #y_labels = ['Temp', 'PotEng', 'Press', 'Cella', 'Cellb',  'Cellc']
     y_ranges_max = [max(np.array(df_limit[key].astype(float))) for key in y_labels]
     y_ranges_min = [min(np.array(df_limit[key].astype(float))) for key in y_labels]
     return df_limit, y_labels, y_ranges_max, y_ranges_min
@@ -451,6 +446,7 @@ def plot_lammps_md():
     #filenames = ['log.lammps']
     legend_grand = len(filenames) > 1 
     fig = None
+    y_ranges = []
 
     for file_n, file_ in enumerate(filenames):
         starting_word = 'Per MPI rank memory'
@@ -481,7 +477,7 @@ def plot_lammps_md():
                           legend_grand)
 
     print(f"md_plots.png is writing...")
-    fig.write_html('md_plots.html')
-    fig.write_image('md_plots.png')
-    print(f"md_plots.png is DONE")
-    return fig.show()
+    n_rows, n_columns = n_col_row(len(y_labels))
+    height, width = plot_size(n_rows, n_columns)
+    fig.write_image('md_plots.png', height=height, width=width, scale=2)
+    #return fig.show()

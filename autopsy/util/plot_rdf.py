@@ -25,18 +25,38 @@ from plotly.subplots import make_subplots
 
 from ase.data import atomic_numbers, atomic_names, atomic_masses, covalent_radii
 
+def n_col_row_3c(n_atoms_type):
+    fs = 16
+    
+    if n_atoms_type <= 2:
+        return 2, 1, fs
+    elif n_atoms_type == 3:
+        return 3, 1, fs
+    elif n_atoms_type <= 50:
+        # 3 columns, rows = 2 + (n_atoms_type - 4) // 3
+        rows = 2 + (n_atoms_type - 4) // 3
+        return 3, rows, fs
+    else:
+        # Default for >50: scale up
+        rows = 2 + (n_atoms_type - 4) // 3
+        return 3, rows, fs
 
 def n_col_row(n_atoms_type):
-    # Map number of atom types to (columns, rows, font_size)
     fs = 16
-    layout_map = {
-        1: (2, 1, fs), 2: (2, 2, fs), 3: (3, 1, fs),
-        4: (3, 2, fs), 5: (3, 2, fs), 6: (3, 2, fs), 7: (3, 3, fs),
-        8: (3, 3, fs), 9: (3, 3, fs), 10:(3, 4, fs), 11:(3, 4, fs),
-       12: (3, 4, fs),13: (3, 5, fs), 14:(3, 5, fs), 15:(3, 5, fs), 16: (3, 6, fs),
-       17: (3, 6, fs),18: (3, 6, fs), 19:(3, 7, fs), 20:(3, 7, fs), 21: (3, 7, fs) 
-    }
-    return layout_map.get(n_atoms_type, (2, 1, fs))
+    
+    if n_atoms_type <= 2:
+        return 2, 1, fs
+    elif n_atoms_type <= 4:
+        return 4, 1, fs
+    elif n_atoms_type <= 50:
+        # 4 columns, rows = 1 + (n_atoms_type - 4) // 4
+        rows = 1 + (n_atoms_type - 4) // 4
+        return 4, rows, fs
+    else:
+        # Scale beyond 50
+        rows = 1 + (n_atoms_type - 4) // 4
+        return 4, rows, fs
+
 
 def axis_details(axis_range, axis_label, font_size, standoff):
     min_val, max_val = axis_range
@@ -281,7 +301,7 @@ def calculate_rdf_data(traj_data, rMax=6, nBins=100):
     
     return all_rdf_data
 
-def plot_rdf():
+def plot_rdf1():
     # Check for structure files
     filenames = []
     for i in range(1, 10):
@@ -328,6 +348,103 @@ def plot_rdf():
     print("No. of subplots: ", no_of_subplots)
     print("RDF pairs:", all_element_pairs)
 
+def plot_rdf():
+    # Check for structure files
+    filenames = []
+    for i in range(1, 20):
+        try:
+            filenames.append(sys.argv[i])
+        except:
+            if i == 1:
+                # No arguments provided, search for files
+                filenames = check_files()
+                print("Found these structure files:", filenames)
+                break
+            else:
+                pass
+
+    if not filenames:
+        filenames = check_files()
+
+    # Ask user if they want to convert to subscript
+    response = input(f"Do you want to convert numbers in legends to subscript format? (y/n): ").strip().lower()
+
+
+    # Read structure files
+    traj_data, symbols, legends = read_structure_files(filenames)
+
+    if not traj_data:
+        print("No valid structure files could be read!")
+        return
+
+    # Calculate RDF data
+    all_rdf_data = calculate_rdf_data(traj_data)
+
+    # Get all unique element pairs across all datasets (order-independent)
+    all_element_pairs = set()
+    for dataset in all_rdf_data:
+        for pair in dataset['rdf_pairs']:
+            # Create sorted tuple to make pairs order-independent
+            element1, element2 = pair['element1'], pair['element2']
+            sorted_pair = tuple(sorted([element1, element2]))
+            all_element_pairs.add(sorted_pair)
+
+    all_element_pairs = sorted(list(all_element_pairs))
+    
+    print("Available RDF pairs:", all_element_pairs)
+    
+    # User choice: all pairs or manual selection
+    response = input("Plot ALL pairs (a) or select specific pairs (s)? [a/s]: ").strip().lower()
+    
+    if response == 's':
+        # Manual selection
+        selected_pairs = []
+        print("\nEnter pairs (e.g., 'C-H', 'O-O', or 'C O') or 'done' to finish:")
+        while True:
+            pair_input = input("Pair (or 'done'): ").strip()
+            if pair_input.lower() == 'done':
+                break
+            
+            # Parse input: handle both "C-H" and "C O" formats
+            if '-' in pair_input:
+                elements = pair_input.split('-')
+            else:
+                elements = pair_input.split()
+            
+            if len(elements) == 2:
+                elem1, elem2 = elements[0].strip(), elements[1].strip()
+                sorted_pair = tuple(sorted([elem1, elem2]))
+                if sorted_pair in all_element_pairs:
+                    selected_pairs.append((elem1, elem2))
+                    print(f"  Added: {elem1}-{elem2}")
+                else:
+                    print(f"  Warning: {elem1}-{elem2} not found in data")
+            else:
+                print("  Invalid format. Use 'C-H' or 'C O'")
+        
+        if not selected_pairs:
+            print("No pairs selected. Exiting.")
+            return
+            
+        plot_pairs = selected_pairs
+        print(f"\nWill plot {len(selected_pairs)} selected pairs")
+        
+    else:
+        # Plot all pairs
+        plot_pairs = all_element_pairs
+        print(f"\nWill plot ALL {len(all_element_pairs)} pairs")
+    
+    # Ask user if they want subscript format
+    response = input("Convert numbers in legends to subscript format? (y/n): ").strip().lower()
+    use_subscript = response == 'y'
+    
+    # Calculate RDF data for selected pairs only
+    all_rdf_data = calculate_rdf_data(traj_data, plot_pairs)
+    no_of_subplots = len(plot_pairs)
+    
+    print("No. of subplots:", no_of_subplots)
+    print("Final RDF pairs to plot:", plot_pairs)
+    
     
     # Get layout configuration
     n_columns, n_rows, font_size = n_col_row(no_of_subplots)
