@@ -136,7 +136,50 @@ def add_subplot_annotation(fig, n_row, n_col, sub_label, plot_range, font_size):
         col=n_col
     )
 
+def plot_lcurve():
+   import pandas as pd
+   import matplotlib.pyplot as plt
+   # 1. Load Data
+   df = pd.read_csv('lcurve.out', sep=r'\s+', comment='#',
+                    names=['step', 'rmse_val', 'rmse_trn', 'rmse_e_val', 'rmse_e_trn', 'rmse_f_val', 'rmse_f_trn', 'lr'])
+  
+   # 2. Set Publication Style
+   plt.rcParams.update({
+       "font.family": "serif",
+       "font.size": 14,
+       "axes.linewidth": 1.5,
+       "xtick.major.width": 1.5,
+       "ytick.major.width": 1.5
+   })
+   
+   fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 10), dpi=300)
+   
+   # --- Plot (a): Energy ---
+   ax1.plot(df['step'], df['rmse_e_trn'], color='lightcoral', alpha=0.7, label='Energy Train')
+   ax1.plot(df['step'], df['rmse_e_val'], color='red', linewidth=1.5, label='Energy Val')
+   ax1.set_ylabel('Energy RMSE (eV)', fontweight='bold')
+   #ax1.set_yscale('log')
+   ax1.text(-0.1, 1.05, '(a)', transform=ax1.transAxes, fontsize=16, fontweight='bold', va='top')
+   ax1.grid(True, which="both", ls="-", alpha=0.4)
+   ax1.legend(loc='upper right', frameon=False)
+   # --- Plot (b): Force ---
+   ax2.plot(df['step'], df['rmse_f_trn'], color='lightskyblue', alpha=0.7, label='Force Train')
+   ax2.plot(df['step'], df['rmse_f_val'], color='blue', linewidth=1.5, label='Force Val')
+   ax2.set_ylabel('Force RMSE (eV/Å)', fontweight='bold')
+   ax2.set_xlabel('Training Step', fontweight='bold')
+   #ax2.set_yscale('log')
+   ax2.text(-0.1, 1.05, '(b)', transform=ax2.transAxes, fontsize=16, fontweight='bold', va='top')
+   ax2.grid(True, which="both", ls="-", alpha=0.4)
+   ax2.legend(loc='upper right', frameon=False)
+   
+   # 3. Final Formatting
+   plt.tight_layout()
+   plt.savefig('deepMD_convergence_pub.png', bbox_inches='tight')
+   plt.savefig('deepMD_convergence_pub.pdf') # Best for papers
+   print("Published plots saved as .png and .pdf")
+ 
 def plot_deepPot_accuracy():
+    plot_lcurve()
     file_force, file_energy, valid_folders = check_files()
     energy_sections = parse_sectioned_file(file_energy, num_cols=2)
     force_sections = parse_sectioned_file(file_force, num_cols=6)
